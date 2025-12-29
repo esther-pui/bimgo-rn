@@ -7,6 +7,7 @@ import { View, Text } from 'react-native';
 import DashboardScreen from './src/screens/Dashboard';
 import LearnListScreen from './src/screens/Learn'; 
 import TranslateLiveScreen from './src/screens/TranslateLive'; 
+import TranslateVideoScreen from './src/screens/TranslateVideo'; 
 import LearnDetailScreen from './src/screens/LearnDetail';
 import LearnVideoScreen from './src/screens/LearnVideo';
 import SettingScreen from './src/screens/Setting';
@@ -38,6 +39,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="Translate" component={TranslateLiveScreen} />
+        <Stack.Screen name="TranslateVideo" component={TranslateVideoScreen} />
         <Stack.Screen name="Learn" component={LearnListScreen} />
         <Stack.Screen name="LearnDetail" component={LearnDetailScreen} />
         <Stack.Screen name="LearnVideo" component={LearnVideoScreen} />
