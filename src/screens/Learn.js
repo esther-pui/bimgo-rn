@@ -23,7 +23,9 @@ export default function LearnListScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <X color="#999" size={30} />
         </TouchableOpacity>
-        <Text style={styles.headerStar}>✱</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+          <Text style={styles.headerStar}>✱</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.content}>
@@ -63,9 +65,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     paddingHorizontal: 20, 
-    paddingVertical: 10 
+    paddingVertical: 10,
+    backgroundColor: '#FFFBD9' 
   },
-  headerStar: { fontSize: 32, color: '#444' },
+  headerStar: { fontSize: 32, color: '#424242' },
   content: { 
     flex: 1, 
     backgroundColor: '#FFF', 

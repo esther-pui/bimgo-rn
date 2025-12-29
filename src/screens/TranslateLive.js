@@ -78,6 +78,31 @@ export default function TranslateLive({ navigation }) {
     }
   }, [facingMode]);
 
+  useEffect(() => {
+    let isCancelled = false; // to stop the loop when recording stops
+
+    const loopTranslation = async () => {
+      const currentWords = translations[targetLang];
+      let index = 0;
+
+      while (!isCancelled) {
+        const word = currentWords[index % currentWords.length];
+        await addWord(word);
+        await new Promise(res => setTimeout(res, 800));
+        index++;
+      }
+    };
+
+    if (isRecording) {
+      loopTranslation();
+    } else {
+      isCancelled = true; // stop loop
+    }
+
+    return () => { isCancelled = true; }; // cleanup if component unmounts
+  }, [isRecording, targetLang]);
+
+
   // Rotate camera
   const rotateCamera = () => {
     if (Platform.OS !== 'web') {
@@ -144,15 +169,22 @@ export default function TranslateLive({ navigation }) {
 
   // Start translating words
   const startTranslation = async () => {
-    setWords([]);
-    setFadeAnims([]);
-    setFavorites([]);
-    setFeedbacks([]);
+    // Start with empty arrays only the first time
+    if (words.length === 0) {
+      setWords([]);
+      setFadeAnims([]);
+      setFavorites([]);
+      setFeedbacks([]);
+    }
 
-    const currentWords = translations[targetLang]; // choose language based on targetLang
-    for (let word of currentWords) {
+    const currentWords = translations[targetLang];
+
+    let index = 0;
+    while (isRecording) {  // <- loop while recording
+      const word = currentWords[index % currentWords.length]; // rotate words
       await addWord(word);
-      await new Promise(res => setTimeout(res, 800));
+      await new Promise(res => setTimeout(res, 800)); // delay between words
+      index++;
     }
   };
 
@@ -171,7 +203,16 @@ export default function TranslateLive({ navigation }) {
   };
 
   // Start on mount
-  useEffect(() => { startTranslation(); }, [targetLang]);
+  // useEffect(() => { startTranslation(); }, [targetLang]);
+
+  const handleRecordPress = () => {
+    setIsRecording(prev => !prev);
+
+    if (!isRecording) {
+      // Start looping translation
+      startTranslation();
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -282,9 +323,13 @@ export default function TranslateLive({ navigation }) {
             </TouchableOpacity>
 
             <Animated.View style={{ transform: [{ scale: pulse }] }}>
-              <TouchableOpacity style={[styles.mainCaptureBtn, isRecording && { borderColor: '#E53935' }]} onPress={() => setIsRecording(prev => !prev)}>
+              <TouchableOpacity
+                style={[styles.mainCaptureBtn, isRecording && { borderColor: '#E53935' }]}
+                onPress={handleRecordPress}
+              >
                 {isRecording ? <View style={styles.stopSquare} /> : <View style={styles.innerCircle} />}
               </TouchableOpacity>
+
             </Animated.View>
 
             <TouchableOpacity style={styles.circleBtn} onPress={rotateCamera}>

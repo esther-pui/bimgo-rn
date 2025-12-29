@@ -9,10 +9,10 @@ export default function TranslateVideo({ route, navigation }) {
   const bimgoColor = useRef(new Animated.Value(0)).current;
 
   // Translation word states
-  const [words, setWords] = useState(['Baik']); // only show "Baik"
-  const [fadeAnims, setFadeAnims] = useState([new Animated.Value(1)]);
-  const [favorites, setFavorites] = useState([false]);
-  const [feedbacks, setFeedbacks] = useState([null]);
+  const [words, setWords] = useState([]);        // start empty
+  const [fadeAnims, setFadeAnims] = useState([]); 
+  const [favorites, setFavorites] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
 
   const [targetLang, setTargetLang] = useState('BM');
 
@@ -25,6 +25,24 @@ export default function TranslateVideo({ route, navigation }) {
       ]),
       { iterations: 2 } // flash twice
     ).start();
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const anim = new Animated.Value(0);
+      setFadeAnims([anim]);
+      setWords(['Baik']);
+      setFavorites([false]);
+      setFeedbacks([null]);
+
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }).start();
+    }, 1500); // delay in ms, adjust as needed
+
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleLanguage = () => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { X, Heart, Play, Megaphone, ThumbsDown, ChevronLeft, ChevronRight, Diamond } from 'lucide-react-native';
+import { ImageBackground } from 'react-native';
 
 export default function LearnDetailScreen({ navigation }) {
   return (
@@ -10,7 +11,9 @@ export default function LearnDetailScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <X color="#999" size={30} />
         </TouchableOpacity>
-        <Text style={styles.headerStar}>✱</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Setting')}>
+          <Text style={styles.headerStar}>✱</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.card}>
@@ -56,8 +59,21 @@ export default function LearnDetailScreen({ navigation }) {
 
         {/* Ads Section */}
         <View style={styles.adsBox}>
-          <Text style={styles.adsText}>ADS</Text>
+          <ImageBackground
+            source={require('../assets/images/shopee_ads.jpg')}
+            style={styles.adsImage}
+            resizeMode="cover"
+          >
+            {/* Small X button */}
+            <TouchableOpacity style={styles.adsCloseBtn} onPress={() => console.log('Ad closed')}>
+              <X size={18} color="#fff" />
+            </TouchableOpacity>
+
+            {/* Optional overlay text */}
+            <Text style={styles.adsText}>Sponsored</Text>
+          </ImageBackground>
         </View>
+
       </View>
 
       {/* Bottom Navigation */}
@@ -71,8 +87,14 @@ export default function LearnDetailScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF0' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, alignItems: 'center' },
-  headerStar: { fontSize: 35, color: '#444' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingVertical: 10,
+    backgroundColor: '#FFFBD9' 
+  },
+  headerStar: { fontSize: 32, color: '#424242' },
   card: { flex: 1, backgroundColor: '#FFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, padding: 25 },
   titleContainer: { marginBottom: 20 },
   mainTitle: { fontSize: 32, fontWeight: 'bold', color: '#333' },
@@ -84,7 +106,43 @@ const styles = StyleSheet.create({
   placeholderImage: { width: '100%', height: 180, borderRadius: 15, backgroundColor: '#F0F0F0' },
   actionColumn: { width: 60, alignItems: 'center', justifyContent: 'center', gap: 25 },
   iconBtn: { padding: 5 },
-  adsBox: { backgroundColor: '#D9D9D9', height: 80, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#000', marginTop: 10 },
-  adsText: { letterSpacing: 5, fontWeight: '500' },
-  bottomNav: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 30, paddingBottom: 10 }
+  bottomNav: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 30, paddingBottom: 10 },
+  adsBox: {
+    height: 90, // realistic banner height
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden', // ensures image + button respect border radius
+    marginTop: 10,
+    backgroundColor: '#f0f0f0', // fallback color
+  },
+
+  adsImage: {
+    flex: 1,          // fills the parent container
+    width: '100%',    // ensures full width
+    height: '100%',   // ensures full height
+    justifyContent: 'flex-end',
+    padding: 5,
+  },
+
+
+  adsText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 5,
+  },
+
+  adsCloseBtn: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 12,
+    padding: 2,
+    zIndex: 10,
+  },
 });

@@ -72,9 +72,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', 
     paddingHorizontal: 20, 
     paddingVertical: 10,
-    backgroundColor: '#FFFDF0' 
+    backgroundColor: '#FFFBD9' 
   },
-  headerStar: { fontSize: 32, color: '#444' },
+  headerStar: { fontSize: 32, color: '#424242' },
   pageTitle: { 
     textAlign: 'center', 
     fontSize: 22, 

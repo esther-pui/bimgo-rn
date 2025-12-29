@@ -51,8 +51,14 @@ export default function RepeatScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF0' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 10 },
-  headerStar: { fontSize: 32, color: '#444' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingVertical: 10,
+    backgroundColor: '#FFFBD9' 
+  },
+  headerStar: { fontSize: 32, color: '#424242' },
   content: { flex: 1, backgroundColor: '#FFF', borderTopLeftRadius: 30, borderTopRightRadius: 30, paddingTop: 20 },
   historyIcon: { marginLeft: 30, marginBottom: 10 },
   sectionHeader: { fontSize: 22, fontWeight: 'bold', marginLeft: 40, marginVertical: 15, color: '#444' },

@@ -65,8 +65,14 @@ export default function AboutScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 10 },
-  headerStar: { fontSize: 32, color: '#444' },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingHorizontal: 20, 
+    paddingVertical: 10,
+    backgroundColor: '#FFFBD9' 
+  },
+  headerStar: { fontSize: 32, color: '#424242' },
   scrollContent: { paddingBottom: 100 },
   logoSection: { alignItems: 'center', marginVertical: 40 },
   logoText: { fontSize: 48, fontWeight: 'bold', color: '#3FB1D5', letterSpacing: 2 },
