@@ -1,86 +1,222 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useState, useRef, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Animated, Alert, Platform } from 'react-native';
 import { X, Sun, Scan, RotateCcw, Heart, Copy, Volume2, ThumbsUp, ThumbsDown } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function TranslateLive({ navigation }) {
-  const [permission, requestPermission] = useCameraPermissions();
+  const rotation = useRef(new Animated.Value(0)).current;
+  const pulse = useRef(new Animated.Value(1)).current;
+  const copiedOpacity = useRef(new Animated.Value(0)).current;
 
-  if (!permission) return <View />;
-  if (!permission.granted) {
-    return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
-        <TouchableOpacity onPress={requestPermission} style={styles.button}>
-          <Text>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  const [flashOn, setFlashOn] = useState(false);
+  const [cameraFacing, setCameraFacing] = useState('back');
+  const [isRecording, setIsRecording] = useState(false);
+
+  const [targetLang, setTargetLang] = useState('BM');
+  const [translatedText, setTranslatedText] = useState('Baik');
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const [showCopied, setShowCopied] = useState(false);
+
+  const toggleLanguage = () => {
+    if (isTranslating) return;
+    setIsTranslating(true);
+    setTimeout(() => {
+      if (targetLang === 'BM') {
+        setTargetLang('EN');
+        setTranslatedText('Good');
+      } else {
+        setTargetLang('BM');
+        setTranslatedText('Baik');
+      }
+      setIsTranslating(false);
+    }, 500);
+  };
+
+  const copyToClipboard = async (text) => {
+    try {
+      if (navigator?.clipboard) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        alert(`Copied: ${text}`);
+      }
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 800);
+    } catch (e) {
+      console.error(e);
+      alert(`Could not copy: ${text}`);
+    }
+  };
+
+  useEffect(() => {
+    if (isRecording) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulse, {
+            toValue: 0.9,
+            duration: 600,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+          Animated.timing(pulse, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: Platform.OS !== 'web',
+          }),
+        ])
+      ).start();
+    } else {
+      pulse.stopAnimation();
+      pulse.setValue(1);
+    }
+  }, [isRecording]);
+
+  const rotateCamera = () => {
+    Animated.timing(rotation, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: Platform.OS !== 'web',
+    }).start(() => rotation.setValue(0));
+
+    setCameraFacing(prev => (prev === 'back' ? 'front' : 'back'));
+    setFlashOn(false);
+  };
+
+  const pickVideoFromGallery = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert('Permission to access media library is required!');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const videoUri = result.assets[0].uri;
+      navigation?.navigate?.('TranslateVideo', { videoUri });
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing="front">
+      {/* Fake camera background */}
+      <View style={{ flex: 1, backgroundColor: '#000' }}>
         <SafeAreaView style={styles.overlay}>
-          {/* Top Controls */}
+          {/* Top bar */}
           <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <X color="white" size={32} />
+            <X color="white" size={32} />
+            <TouchableOpacity onPress={() => setFlashOn(prev => !prev)}>
+              <Sun color={flashOn ? '#FFD700' : 'white'} size={28} />
             </TouchableOpacity>
-            <Sun color="white" size={28} />
           </View>
 
-          {/* Viewfinder Corners */}
+          {/* Fake viewfinder */}
           <View style={styles.viewfinder}>
-             <View style={[styles.corner, { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4 }]} />
-             <View style={[styles.corner, { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4 }]} />
-             <View style={[styles.corner, { bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4 }]} />
-             <View style={[styles.corner, { bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4 }]} />
+            <View style={[styles.corner, { top: 0, left: 0, borderTopWidth: 4, borderLeftWidth: 4 }]} />
+            <View style={[styles.corner, { top: 0, right: 0, borderTopWidth: 4, borderRightWidth: 4 }]} />
+            <View style={[styles.corner, { bottom: 0, left: 0, borderBottomWidth: 4, borderLeftWidth: 4 }]} />
+            <View style={[styles.corner, { bottom: 0, right: 0, borderBottomWidth: 4, borderRightWidth: 4 }]} />
           </View>
 
-          {/* Translation Bottom Sheet */}
+          {/* Bottom sheet */}
           <View style={styles.bottomSheet}>
             <Text style={styles.sheetTitle}>TRANSLATING</Text>
+
             <View style={styles.infoRow}>
-               <Text style={styles.langText}>▼ BM</Text>
-               <Text style={styles.confidenceText}>confidence level 😊</Text>
+              <TouchableOpacity onPress={toggleLanguage}>
+                <Text style={styles.langText}>▼ {targetLang}</Text>
+              </TouchableOpacity>
+              <Text style={styles.confidenceText}>confidence level 😊</Text>
             </View>
 
             <View style={styles.resultBox}>
               <View style={styles.resultItem}>
                 <Text style={styles.aiText}>✨ BIMGo...</Text>
               </View>
+
               <View style={styles.separator} />
-              
-              {/* Mock Translation Result */}
+
               <View style={styles.resultItem}>
-                <Text style={styles.translatedWord}>Baik</Text>
+                <Text style={styles.translatedWord}>{isTranslating ? '…' : translatedText}</Text>
+
+                {showCopied && (
+                  <Text style={{ fontSize: 12, color: '#424242', marginTop: 4 }}>Copied ✓</Text>
+                )}
+
                 <View style={styles.iconRow}>
-                  <Heart size={18} color="#666" />
-                  <Copy size={18} color="#666" />
-                  <Volume2 size={18} color="#666" />
-                  <ThumbsUp size={18} color="#666" />
-                  <ThumbsDown size={18} color="#666" />
+                  <TouchableOpacity onPress={() => setIsFavorited(prev => !prev)}>
+                    <Heart
+                      size={18}
+                      color={isFavorited ? '#424242' : '#666'}   // stroke color
+                      strokeWidth={2}
+                      fill={isFavorited ? '#424242' : 'none'}    // fill color
+                    />
+
+                  
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => copyToClipboard(translatedText)}>
+                    <Copy size={18} color="#666" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => Alert.alert('🔊 Playing pronunciation')}>
+                    <Volume2 size={18} color="#666" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setFeedback('up')}>
+                    <ThumbsUp size={18} color={feedback === 'up' ? '#424242' : '#666'} fill={feedback === 'up' ? '#424242' : 'none'}/>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity onPress={() => setFeedback('down')}>
+                    <ThumbsDown size={18} color={feedback === 'down' ? '#424242' : '#666'} fill={feedback === 'down' ? '#424242' : 'none'}/>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
 
-            {/* Camera Actions */}
             <View style={styles.actionRow}>
-              <TouchableOpacity style={styles.circleBtn}><Scan color="#333" /></TouchableOpacity>
-              <TouchableOpacity style={styles.mainCaptureBtn}><View style={styles.innerCircle} /></TouchableOpacity>
-              <TouchableOpacity style={styles.circleBtn}><RotateCcw color="#333" /></TouchableOpacity>
+              <TouchableOpacity style={styles.circleBtn} onPress={pickVideoFromGallery}>
+                <Scan color="#333" />
+              </TouchableOpacity>
+
+              <Animated.View style={{ transform: [{ scale: pulse }] }}>
+                <TouchableOpacity
+                  style={[styles.mainCaptureBtn, isRecording && { borderColor: '#E53935' }]}
+                  onPress={() => setIsRecording(prev => !prev)}
+                >
+                  {isRecording ? <View style={styles.stopSquare} /> : <View style={styles.innerCircle} />}
+                </TouchableOpacity>
+              </Animated.View>
+
+              <TouchableOpacity style={styles.circleBtn} onPress={rotateCamera}>
+                <Animated.View
+                  style={{
+                    transform: [{
+                      rotate: rotation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '180deg'],
+                      }),
+                    }],
+                  }}
+                >
+                  <RotateCcw color="#333" />
+                </Animated.View>
+              </TouchableOpacity>
             </View>
           </View>
         </SafeAreaView>
-      </CameraView>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  camera: { flex: 1 },
   overlay: { flex: 1, justifyContent: 'space-between' },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', padding: 20 },
   viewfinder: { position: 'absolute', top: '15%', left: '10%', right: '10%', height: '40%' },
@@ -99,5 +235,6 @@ const styles = StyleSheet.create({
   actionRow: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', marginTop: 25 },
   circleBtn: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#EEE', justifyContent: 'center', alignItems: 'center' },
   mainCaptureBtn: { width: 80, height: 80, borderRadius: 40, borderWidth: 4, borderColor: '#999', justifyContent: 'center', alignItems: 'center' },
-  innerCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#999' }
+  innerCircle: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#999' },
+  stopSquare: { width: 32, height: 32, backgroundColor: '#E53935', borderRadius: 6 },
 });

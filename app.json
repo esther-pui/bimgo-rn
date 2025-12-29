@@ -8,6 +8,14 @@
       "android",
       "web"
     ],
+    "web": {
+      "favicon": "./assets/images/bimgo_icon_512w.png",
+      "shortName": "BIMGo",
+      "backgroundColor": "#ffffff",
+      "themeColor": "#000000",
+      "display": "standalone",
+      "startUrl": "/index.html"
+    },
     "plugins": [
       [
         "expo-video",
