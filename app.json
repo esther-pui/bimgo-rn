@@ -1,5 +1,26 @@
 {
-  "plugins": [
-    "expo-video"
-  ]
+  "expo": {
+    "name": "bimgo-rn",
+    "slug": "bimgo-rn",
+    "version": "1.0.0",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "plugins": [
+      [
+        "expo-video",
+        {
+          "web": false
+        }
+      ]
+    ],
+    "android": {
+      "package": "com.esther_pui.bimgorn"
+    },
+    "ios": {
+      "bundleIdentifier": "com.esther-pui.bimgorn"
+    }
+  }
 }

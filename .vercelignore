@@ -1,0 +1,17 @@
+# Node modules (don’t deploy)
+node_modules
+
+# Git files
+.git
+.gitignore
+
+# Logs
+*.log
+
+# Local build folders
+.expo
+.expo-web
+web-build
+
+# macOS system files
+.DS_Store
